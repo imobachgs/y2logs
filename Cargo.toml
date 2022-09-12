@@ -1,0 +1,6 @@
+[workspace]
+
+members = [
+  "y2logs_model",
+]
+
