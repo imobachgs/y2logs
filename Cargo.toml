@@ -1,6 +1,7 @@
 [workspace]
 
 members = [
-  "y2logs_model",
+  "y2logs_cli",
+  "y2logs_model"
 ]
 
