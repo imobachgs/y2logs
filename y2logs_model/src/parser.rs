@@ -1,4 +1,4 @@
-use crate::log::{Entry, Level, Location};
+use crate::log::{Entry, Level, Location, Pid};
 use std::str::FromStr;
 use chrono::naive::{NaiveDate, NaiveDateTime, NaiveTime};
 use thiserror::Error;
@@ -87,9 +87,9 @@ fn hostname(s: &str) -> IResult<&str, String> {
     parser(s).map(|(rest, hostname)| (rest, hostname.to_string()))
 }
 
-fn pid(s: &str) -> IResult<&str, u32> {
+fn pid(s: &str) -> IResult<&str, Pid> {
     let mut parser = delimited(tag("("), number, tag(")"));
-    parser(s).map(|(rest, value)| (rest, value))
+    parser(s).map(|(rest, value)| (rest, Pid(value)))
 }
 
 fn component_name_parser(s: &str) -> IResult<&str, String> {
@@ -170,7 +170,7 @@ Done
                 datetime,
                 level: Level::Info,
                 hostname: "localhost.localdomain".to_string(),
-                pid: 12375,
+                pid: Pid(12375),
                 component: "libstorage".to_string(),
                 location: Location {
                     file: "SystemCmd.cc".to_string(),
@@ -186,7 +186,7 @@ Done
                 datetime,
                 level: Level::Debug,
                 hostname: "localhost.localdomain".to_string(),
-                pid: 12375,
+                pid: Pid(12375),
                 component: "libstorage".to_string(),
                 location: Location {
                     file: "CmdParted.cc".to_string(),
@@ -210,7 +210,7 @@ Done
                 datetime,
                 level: Level::Info,
                 hostname: "localhost.localdomain".to_string(),
-                pid: 12375,
+                pid: Pid(12375),
                 component: "libstorage".to_string(),
                 location: Location {
                     file: "SystemCmd.cc".to_string(),

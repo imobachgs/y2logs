@@ -62,6 +62,27 @@ impl fmt::Display for Level {
         write!(f, "{}", value)
     }
 }
+
+#[derive(Debug, PartialEq, Eq, Clone, Copy)]
+pub struct Pid(pub u32);
+
+impl fmt::Display for Pid {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        write!(f, "{}", self.0)
+    }
+}
+
+impl FromStr for Pid {
+    type Err = String;
+
+    fn from_str(s: &str) -> Result<Self, Self::Err> {
+        match s.parse() {
+            Ok(value) => Ok(Pid(value)),
+            Err(_) => Err(format!("Could not parse {}", s))
+        }
+    }
+}
+
 /// Represents the origin of a log entry
 ///
 /// It might include the file, the method and the line (or almost any combination of them).
@@ -98,7 +119,7 @@ pub struct Entry {
     /// Hostname
     pub hostname: String,
     /// Process ID
-    pub pid: u32,
+    pub pid: Pid,
     /// YaST2 component name
     pub component: String,
     /// Origin of the log message
@@ -152,7 +173,7 @@ impl Log {
 pub struct  Query<'a> {
     log: &'a Log,
     level: Option<Level>,
-    pid: Option<u32>
+    pid: Option<Pid>
 }
 
 impl<'a> Query<'a> {
@@ -172,7 +193,7 @@ impl<'a> Query<'a> {
     }
 
     // Adds a condition on the pid field
-    pub fn with_pid(&mut self, pid: u32) -> &mut Self {
+    pub fn with_pid(&mut self, pid: Pid) -> &mut Self {
         self.pid = Some(pid);
         self
     }
