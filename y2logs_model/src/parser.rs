@@ -1,6 +1,7 @@
 use crate::log::{Entry, Level, Location};
 use std::str::FromStr;
 use chrono::naive::{NaiveDate, NaiveDateTime, NaiveTime};
+use thiserror::Error;
 
 use nom::{
     branch::alt,
@@ -10,11 +11,20 @@ use nom::{
     combinator::{eof, map, map_res, opt, peek, recognize},
     multi::{many0, many_till},
     sequence::{delimited, pair, tuple},
-    IResult,
+    IResult
 };
 
-pub fn parse_y2log(s: &str) -> IResult<&str, Vec<Entry>> {
-    many0(parse_line)(s)
+#[derive(Error, Debug)]
+#[error("unable to parse the log")]
+pub struct ParseError;
+
+pub fn parse_string(s: &str) -> Result<Vec<Entry>, ParseError> {
+    let mut parser = many0(parse_line);
+    match parser(s) {
+        Ok((_rest, entries)) => Ok(entries),
+        // use anyhow to do not lose context
+        Err(_e) => Err(ParseError)
+    }
 }
 
 fn parse_line(s: &str) -> IResult<&str, Entry> {
@@ -91,7 +101,7 @@ fn component_name_parser(s: &str) -> IResult<&str, String> {
 
 fn component(s: &str) -> IResult<&str, String> {
     let mut parser = delimited(tag("["), component_name_parser, tag("]"));
-    parser(s).map(|(rest, value)| (rest, value.to_string()))
+    parser(s).map(|(rest, value)| (rest, value))
 }
 
 fn digits_and_hyphen(s: &str) -> IResult<&str, &str> {
@@ -150,7 +160,7 @@ mod test {
         let y2log = r#"2022-08-25 14:28:44 <1> localhost.localdomain(12375) [libstorage] SystemCmd.cc(addLine):569 Adding Line 14...
 Done
 2022-08-25 14:28:44 <0> localhost.localdomain(12375) [libstorage] CmdParted.cc(parse):139 device:/dev/nvme0n1"#;
-        let (_, lines) = parse_y2log(&y2log).unwrap();
+        let lines = parse_string(&y2log).unwrap();
 
         let datetime =
             NaiveDateTime::parse_from_str("2022-08-25 14:28:44", "%Y-%m-%d %H:%M:%S").unwrap();
