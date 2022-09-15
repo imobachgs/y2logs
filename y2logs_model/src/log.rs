@@ -173,7 +173,9 @@ impl Log {
 pub struct  Query<'a> {
     log: &'a Log,
     level: Option<Level>,
-    pid: Option<Pid>
+    pid: Option<Pid>,
+    component: Option<String>,
+    hostname: Option<String>
 }
 
 impl<'a> Query<'a> {
@@ -182,7 +184,9 @@ impl<'a> Query<'a> {
         Query {
             log,
             level: None,
-            pid: None
+            pid: None,
+            component: None,
+            hostname: None
         }
     }
 
@@ -195,6 +199,18 @@ impl<'a> Query<'a> {
     // Adds a condition on the pid field
     pub fn with_pid(&mut self, pid: Pid) -> &mut Self {
         self.pid = Some(pid);
+        self
+    }
+
+    // Adds a condition on the component name field
+    pub fn with_component(&mut self, component: String) -> &mut Self {
+        self.component = Some(component);
+        self
+    }
+
+    // Adds a condition on the hostname field
+    pub fn with_hostname(&mut self, hostname: String) -> &mut Self {
+        self.hostname = Some(hostname);
         self
     }
 
@@ -211,9 +227,17 @@ impl<'a> Query<'a> {
                     if pid != e.pid { return false };
                 }
 
+                if let Some(component) = &self.component {
+                    if component != &e.component { return false };
+                }
+
+                if let Some(hostname) = &self.hostname {
+                    if hostname != &e.hostname { return false };
+                }
+
                 true
             })
-            .map(|e| e.clone())
+            .cloned()
             .collect();
         Log { entries }
     }
