@@ -147,7 +147,7 @@ impl fmt::Display for Entry {
 /// Collection of YaST2 log entries
 #[derive(Debug)]
 pub struct Log {
-    pub entries: Vec<Entry>
+    entries: Vec<Entry>
 }
 
 impl Log {
@@ -163,6 +163,26 @@ impl Log {
     /// Constructs a query object for the current log
     pub fn query(&self) -> Query {
         Query::new(self)
+    }
+}
+
+// supports "for line in log"
+impl IntoIterator for Log {
+    type Item = Entry;
+    type IntoIter = std::vec::IntoIter<Self::Item>;
+
+    fn into_iter(self) -> Self::IntoIter {
+        self.entries.into_iter()
+    }
+}
+
+// supports "for line in &log"
+impl<'a> IntoIterator for &'a Log {
+    type Item = <std::slice::Iter<'a, Entry> as Iterator>::Item;
+    type IntoIter = std::slice::Iter<'a, Entry>;
+
+    fn into_iter(self) -> Self::IntoIter {
+        self.entries.as_slice().into_iter()
     }
 }
 

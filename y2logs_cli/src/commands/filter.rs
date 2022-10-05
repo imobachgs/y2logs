@@ -20,7 +20,7 @@ pub fn run(args: &FilterArgs) {
 
     let filtered = query.to_log();
 
-    for line in filtered.entries {
+    for line in filtered {
         println!("{}", line);
     }
 }
