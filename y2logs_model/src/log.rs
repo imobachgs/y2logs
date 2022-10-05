@@ -195,7 +195,9 @@ pub struct  Query<'a> {
     level: Option<Level>,
     pid: Option<Pid>,
     component: Option<String>,
-    hostname: Option<String>
+    hostname: Option<String>,
+    from_datetime: Option<NaiveDateTime>,
+    to_datetime: Option<NaiveDateTime>
 }
 
 impl<'a> Query<'a> {
@@ -206,7 +208,9 @@ impl<'a> Query<'a> {
             level: None,
             pid: None,
             component: None,
-            hostname: None
+            hostname: None,
+            from_datetime: None,
+            to_datetime: None
         }
     }
 
@@ -234,6 +238,16 @@ impl<'a> Query<'a> {
         self
     }
 
+    pub fn from_datetime(&mut self, datetime: NaiveDateTime) -> &mut Self {
+        self.from_datetime = Some(datetime);
+        self
+    }
+
+    pub fn to_datetime(&mut self, datetime: NaiveDateTime) -> &mut Self {
+        self.to_datetime = Some(datetime);
+        self
+    }
+
     // Filters the entries and constructs a new Log object with the result
     pub fn to_log(&self) -> Log {
         let entries = self.log.entries.iter()
@@ -253,6 +267,14 @@ impl<'a> Query<'a> {
 
                 if let Some(hostname) = &self.hostname {
                     if hostname != &e.hostname { return false };
+                }
+
+                if let Some(from_datetime) = &self.from_datetime {
+                    if from_datetime > &e.datetime { return false };
+                }
+
+                if let Some(to_datetime) = &self.to_datetime {
+                    if to_datetime < &e.datetime { return false };
                 }
 
                 true

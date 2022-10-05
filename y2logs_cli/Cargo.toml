@@ -6,5 +6,6 @@ edition = "2021"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
+chrono = "0.4.22"
 clap = { version = "3.2.21", features = ["derive"] }
 y2logs_model = { path = "../y2logs_model" }
