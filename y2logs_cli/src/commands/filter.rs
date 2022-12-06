@@ -2,6 +2,7 @@ use std::path::PathBuf;
 use clap::Args;
 use y2logs_model::{Log, Level, Pid};
 use chrono::{naive::NaiveDateTime, format::ParseResult};
+use regex::Regex;
 
 pub fn run(args: &FilterArgs) {
     let log = Log::from_file(&args.file).unwrap();
@@ -29,6 +30,15 @@ pub fn run(args: &FilterArgs) {
 
     if let Some(datetime) = &args.to_datetime {
         query.to_datetime(*datetime);
+    }
+
+    if let Some(text) = &args.text {
+        query.with_text(text.to_owned());
+    }
+
+    if let Some(regex) = &args.regex {
+        // TODO: handle error
+        query.with_regex(Regex::new(regex).unwrap());
     }
 
     let filtered = query.to_log();
@@ -59,7 +69,12 @@ pub struct FilterArgs {
     pub from_datetime: Option<NaiveDateTime>,
     /// Up to the given date/time
     #[clap(long,value_parser=parse_datetime)]
-    pub to_datetime: Option<NaiveDateTime>
+    pub to_datetime: Option<NaiveDateTime>,
+    /// Filter by lines that includes this text in the message,
+    #[clap(long)]
+    pub text: Option<String>,
+    #[clap(long)]
+    pub regex: Option<String>
 }
 
 // Parse datetime from the command line

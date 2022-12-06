@@ -8,4 +8,5 @@ edition = "2021"
 [dependencies]
 chrono = "0.4.22"
 clap = { version = "3.2.21", features = ["derive"] }
+regex = "1.6.0"
 y2logs_model = { path = "../y2logs_model" }

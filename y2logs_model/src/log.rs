@@ -3,6 +3,7 @@
 use chrono::naive::NaiveDateTime;
 use std::{fmt, str::FromStr, path::Path, fs, error::Error};
 use crate::parser;
+use regex::Regex;
 
 /// Log level of an entry
 #[derive(Debug, PartialEq, Eq, Copy, Clone)]
@@ -197,7 +198,9 @@ pub struct  Query<'a> {
     component: Option<String>,
     hostname: Option<String>,
     from_datetime: Option<NaiveDateTime>,
-    to_datetime: Option<NaiveDateTime>
+    to_datetime: Option<NaiveDateTime>,
+    text: Option<String>,
+    regex: Option<Regex>
 }
 
 impl<'a> Query<'a> {
@@ -210,7 +213,9 @@ impl<'a> Query<'a> {
             component: None,
             hostname: None,
             from_datetime: None,
-            to_datetime: None
+            to_datetime: None,
+            text: None,
+            regex: None
         }
     }
 
@@ -248,6 +253,16 @@ impl<'a> Query<'a> {
         self
     }
 
+    pub fn with_text(&mut self, text: String) -> &mut Self {
+        self.text = Some(text);
+        self
+    }
+
+    pub fn with_regex(&mut self, regex: Regex) -> &mut Self {
+        self.regex = Some(regex);
+        self
+    }
+
     // Filters the entries and constructs a new Log object with the result
     pub fn to_log(&self) -> Log {
         let entries = self.log.entries.iter()
@@ -275,6 +290,14 @@ impl<'a> Query<'a> {
 
                 if let Some(to_datetime) = &self.to_datetime {
                     if to_datetime < &e.datetime { return false };
+                }
+
+                 if let Some(text) = &self.text {
+                    if !e.message.contains(text) { return false };
+                }
+
+                if let Some(regex) = &self.regex {
+                    if !regex.is_match(&e.message) { return false };
                 }
 
                 true
